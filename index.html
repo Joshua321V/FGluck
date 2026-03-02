@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Good Luck Message</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* --- CSS STYLES --- */
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* Canvas for Fireworks */
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Main Message Container */
+        .message-container {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 3rem 4rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            animation: floatIn 1.5s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        h1 {
+            font-family: 'Great Vibes', cursive;
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: #ffd1dc; /* Soft pink */
+            text-shadow: 0 0 10px rgba(255, 209, 220, 0.5);
+        }
+
+        p {
+            font-size: 1.2rem;
+            font-weight: 300;
+            line-height: 1.6;
+            color: #e0e0e0;
+            margin-bottom: 2rem;
+        }
+
+        /* Flower Container */
+        .flower-container {
+            position: absolute;
+            bottom: -60px; /* Slightly overlapping the box */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 100px;
+            z-index: 11;
+            animation: sway 3s ease-in-out infinite alternate;
+        }
+
+        /* SVG Flower Styling */
+        .flower-svg {
+            width: 100%;
+            height: 100%;
+            fill: #ff6b6b;
+            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3));
+        }
+
+        /* Animations */
+        @keyframes floatIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes sway {
+            0% { transform: translateX(-50%) rotate(-5deg); }
+            100% { transform: translateX(-50%) rotate(5deg); }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .message-container {
+                padding: 2rem;
+                margin: 1rem;
+            }
+            h1 {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background Fireworks Canvas -->
+    <canvas id="canvas"></canvas>
+
+    <!-- Main Content -->
+    <div class="message-container">
+        <h1>Good Luck To Your Exam!</h1>
+        <p>
+            I know you are going to be amazing.<br>
+            Study hard, stay calm, and shine like the star you are.<br>
+            I'm cheering for you always! &hearts;<br>
+            <hr>
+        </p>
+
+        <!-- Flower SVG -->
+        <div class="flower-container">
+            <svg class="flower-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <!-- Stem -->
+                <path d="M50 100 Q50 80 50 60" stroke="#4CAF50" stroke-width="4" fill="none"/>
+                <path d="M50 80 Q60 70 65 60" stroke="#4CAF50" stroke-width="3" fill="none"/>
+                <path d="M50 70 Q40 60 35 50" stroke="#4CAF50" stroke-width="3" fill="none"/>
+                <!-- Petals -->
+                <circle cx="50" cy="40" r="15" fill="#ff6b6b" />
+                <circle cx="35" cy="50" r="15" fill="#ff6b6b" />
+                <circle cx="65" cy="50" r="15" fill="#ff6b6b" />
+                <circle cx="40" cy="25" r="15" fill="#ff6b6b" />
+                <circle cx="60" cy="25" r="15" fill="#ff6b6b" />
+                <!-- Center -->
+                <circle cx="50" cy="40" r="12" fill="#ffd700" />
+            </svg>
+        </div>
+    </div>
+
+    <script>
+        /* --- JAVASCRIPT FOR FIREWORKS --- */
+        
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let fireworks = [];
+        let particles = [];
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Helper to get random number
+        const random = (min, max) => Math.random() * (max - min) + min;
+
+        // Firework Class (The rocket shooting up)
+        class Firework {
+            constructor(sx, sy, tx, ty) {
+                this.x = sx;
+                this.y = sy;
+                this.sx = sx;
+                this.sy = sy;
+                this.tx = tx;
+                this.ty = ty;
+                this.distanceToTarget = Math.sqrt(Math.pow(tx - sx, 2) + Math.pow(ty - sy, 2));
+                this.distanceTraveled = 0;
+                this.coordinates = [];
+                this.coordinateCount = 3;
+                while (this.coordinateCount--) {
+                    this.coordinates.push([this.x, this.y]);
+                }
+                this.angle = Math.atan2(ty - sy, tx - sx);
+                this.speed = 2;
+                this.acceleration = 1.05;
+                this.brightness = random(50, 70);
+            }
+
+            update(index) {
+                this.coordinates.pop();
+                this.coordinates.unshift([this.x, this.y]);
+
+                this.speed *= this.acceleration;
+
+                const vx = Math.cos(this.angle) * this.speed;
+                const vy = Math.sin(this.angle) * this.speed;
+
+                this.distanceTraveled = Math.sqrt(Math.pow(this.sx - this.x, 2) + Math.pow(this.sy - this.y, 2));
+
+                if (this.distanceTraveled >= this.distanceToTarget) {
+                    createParticles(this.tx, this.ty);
+                    fireworks.splice(index, 1);
+                } else {
+                    this.x += vx;
+                    this.y += vy;
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.moveTo(this.coordinates[this.coordinates.length - 1][0], this.coordinates[this.coordinates.length - 1][1]);
+                ctx.lineTo(this.x, this.y);
+                ctx.strokeStyle = 'hsl(' + random(0, 0) + ', 100%, ' + this.brightness + '%)'; // White/Gold sparks
+                ctx.stroke();
+            }
+        }
+
+        // Particle Class (The explosion)
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = this.y;
+                this.coordinates = [];
+                this.coordinateCount = 5;
+                while (this.coordinateCount--) {
+                    this.coordinates.push([this.x, this.y]);
+                }
+                this.angle = random(0, Math.PI * 2);
+                this.speed = random(1, 10);
+                this.friction = 0.95;
+                this.gravity = 1;
+                this.hue = random(0, 360); // Rainbow colors
+                this.brightness = random(50, 80);
+                this.alpha = 1;
+                this.decay = random(0.015, 0.03);
+            }
+
+            update(index) {
+                this.coordinates.pop();
+                this.coordinates.unshift([this.x, this.y]);
+                this.speed *= this.friction;
+                this.x += Math.cos(this.angle) * this.speed;
+                this.y += Math.sin(this.angle) * this.speed + this.gravity;
+                this.alpha -= this.decay;
+
+                if (this.alpha <= this.decay) {
+                    particles.splice(index, 1);
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.moveTo(this.coordinates[this.coordinates.length - 1][0], this.coordinates[this.coordinates.length - 1][1]);
+                ctx.lineTo(this.x, this.y);
+                ctx.strokeStyle = 'hsla(' + this.hue + ', 100%, ' + this.brightness + '%, ' + this.alpha + ')';
+                ctx.stroke();
+            }
+        }
+
+        function createParticles(x, y) {
+            let particleCount = 30;
+            while (particleCount--) {
+                particles.push(new Particle(x, y));
+            }
+        }
+
+        function loop() {
+            requestAnimationFrame(loop);
+
+            // Create trails by drawing semi-transparent black rect
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.globalCompositeOperation = 'lighter';
+
+            // Launch fireworks randomly
+            if (Math.random() < 0.05) {
+                fireworks.push(new Firework(canvas.width / 2, canvas.height, random(0, canvas.width), random(0, canvas.height / 2)));
+            }
+
+            let i = 0;
+            while (i < fireworks.length) {
+                fireworks[i].draw();
+                fireworks[i].update(i);
+                i++;
+            }
+
+            let j = 0;
+            while (j < particles.length) {
+                particles[j].draw();
+                particles[j].update(j);
+                j++;
+            }
+        }
+
+        loop();
+    </script>
+</body>
+</html>
